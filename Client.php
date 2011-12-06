@@ -216,37 +216,26 @@ class Credis_Client {
 
         $name = strtolower($name);
 
-        // Flatten array arguments to multiple arguments except if using phpredis with mget
-        if($name == 'mget' && ! $this->standalone) {
-            if(isset($args[0]) && ! is_array($args[0])) {
-                $args = array($args);
-            }
-        }
-        else if($name == 'lrem' && ! $this->standalone) {
-            $args = array($args[0], $args[2], $args[1]);
-        }
-        else {
+        // Send request via native PHP
+        if($this->standalone)
+        {
+            // Always flatten array arguments
             $argsFlat = NULL;
             foreach($args as $index => $arg) {
-                if(is_array($arg)) {
-                    if($argsFlat === NULL) {
-                        $argsFlat = array_slice($args, 0, $index);
-                    }
-                    $argsFlat = array_merge($argsFlat, $arg);
-                } else if($argsFlat !== NULL) {
-                    $argsFlat[] = $arg;
+                if($argsFlat !== NULL) {
+                    array_splice($argsFlat, count($argsFlat), 0, $arg);
+                }
+                else if(is_array($arg)) {
+                    $argsFlat = array_slice($args, 0, $index);
+                    array_splice($argsFlat, count($argsFlat), 0, $arg);
                 }
             }
             if($argsFlat !== NULL) {
                 $args = $argsFlat;
                 $argsFlat = NULL;
             }
-        }
 
-        // Send request via native PHP
-        if($this->standalone)
-        {
-            // In pipeline mode
+            // In pipeline modes
             if($this->use_pipeline)
             {
                 if($name == 'pipeline') {
@@ -317,6 +306,16 @@ class Credis_Client {
         // Send request via phpredis client
         else
         {
+            // Tweak arguments for phpredis
+            if($name == 'mget') {
+                if( isset($args[0]) && ! is_array($args[0])) {
+                    $args = array($args);
+                }
+            }
+            else if($name == 'lrem') {
+                $args = array($args[0], $args[2], $args[1]);
+            }
+
             try {
                 // Proxy pipeline mode to the phpredis library
                 if($name == 'pipeline' || $name == 'multi') {
