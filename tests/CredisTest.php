@@ -5,7 +5,7 @@ require_once dirname(__FILE__).'/../Client.php';
 class CredisTest extends PHPUnit_Framework_TestCase
 {
 
-  /** @var Credis_Client */
+  /** @var \Credis\Client */
   protected $credis;
 
   protected $config;
@@ -21,7 +21,7 @@ class CredisTest extends PHPUnit_Framework_TestCase
       }
       $this->config = json_decode($config);
     }
-    $this->credis = new Credis_Client($this->config->host, $this->config->port, $this->config->timeout);
+    $this->credis = new \Credis\Client($this->config->host, $this->config->port, $this->config->timeout);
     if($this->useStandalone) {
       $this->credis->forceStandalone();
     }
@@ -93,7 +93,7 @@ class CredisTest extends PHPUnit_Framework_TestCase
 
   public function testFalsey()
   {
-    $this->assertEquals(Credis_Client::TYPE_NONE, $this->credis->type('foo'));
+    $this->assertEquals(\Credis\Client::TYPE_NONE, $this->credis->type('foo'));
   }
 
   public function testPipeline()
@@ -110,7 +110,7 @@ class CredisTest extends PHPUnit_Framework_TestCase
         ->get('big')
         ->exec();
     $this->assertEquals(array(
-      'OK', 123, 1, array(123), 'OK', '', 'OK', $longString
+      true, 123, 1, array(123), true, '', true, $longString
     ), $reply);
 
     $this->assertEquals(array(), $this->credis->pipeline()->exec());
@@ -141,7 +141,7 @@ class CredisTest extends PHPUnit_Framework_TestCase
         ->lpop('a')
         ->exec();
     $this->assertEquals(2, count($reply));
-    $this->assertEquals('OK', $reply[0]);
+    $this->assertEquals(true, $reply[0]);
     $this->assertFalse($reply[1]);
   }
 

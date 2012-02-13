@@ -19,12 +19,14 @@
  * @package Credis_Client
  */
 
+namespace Credis;
+
 if( ! defined('CRLF')) define('CRLF', sprintf('%s%s', chr(13), chr(10)));
 
 /**
  * Wraps native Redis errors in friendlier PHP exceptions
  */
-class CredisException extends Exception {
+class CredisException extends \Exception {
 }
 
 /**
@@ -33,8 +35,8 @@ class CredisException extends Exception {
  * Server/Connection:
  * @method string auth(string $password)
  * @method string select(int $index)
- * @method Credis_Client pipeline()
- * @method Credis_Client multi()
+ * @method Client pipeline()
+ * @method Client multi()
  * @method array exec()
  * @method string flushAll()
  * @method string flushDb()
@@ -62,7 +64,7 @@ class CredisException extends Exception {
  * @method array sInter(string|array $key, string $key2, ...)
  * @method array sDiff(string|array $key, string $key2, ...)
  */
-class Credis_Client {
+class Client {
 
     const TYPE_STRING      = 'string';
     const TYPE_LIST        = 'list';
@@ -153,7 +155,7 @@ class Credis_Client {
     }
 
     /**
-     * @return Credis_Client
+     * @return Client
      */
     public function forceStandalone()
     {
@@ -184,7 +186,7 @@ class Credis_Client {
             }
         }
         else {
-            $this->redis = new Redis;
+            $this->redis = new \Redis;
             if(substr($this->host,0,1) == '/') {
               $result = $this->redis->connect($this->host, null, $this->timeout);
             } else {
@@ -354,7 +356,7 @@ class Credis_Client {
                 $response = call_user_func_array(array($this->redis, $name), $args);
             }
             // Wrap exceptions
-            catch(RedisException $e) {
+            catch(\RedisException $e) {
                 throw new CredisException($e->getMessage(), $e->getCode());
             }
 

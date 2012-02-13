@@ -9,10 +9,12 @@
 
 #require_once 'Credis/Client.php';
 
+namespace Credis;
+
 /**
  * A generalized Credis_Client interface for a cluster of Redis servers
  */
-class Credis_Cluster {
+class Cluster {
 
 	/**
 	 * Collection of Credis_Client objects attached to Redis servers
@@ -70,7 +72,7 @@ class Credis_Cluster {
 		$this->ring = array();
 		$this->aliases = array();
 		foreach ($servers as $alias => $server) {
-			$this->clients[] = new Credis_Client($server['host'], $server['port'], isset($server['timeout']) ? $server['timeout'] : 2.5);
+			$this->clients[] = new Client($server['host'], $server['port'], isset($server['timeout']) ? $server['timeout'] : 2.5);
 			if (is_string($alias)) {
 				$this->aliases[$alias] = $this->clients[count($this->clients)-1];
 			}
@@ -85,7 +87,7 @@ class Credis_Cluster {
 	/**
 	 * Routes a command to a specific Redis server aliased by {$alias}.
 	 * @param string $alias The alias of the Redis server
-	 * @return Credis_Client The client object attached to the Redis server
+	 * @return Client The client object attached to the Redis server
 	 */
 	function to($alias) {
 		if (isset($this->aliases[$alias])) {
@@ -116,7 +118,7 @@ class Credis_Cluster {
 	/**
 	 * Routes to the proper server node
 	 * @param integer $needle The hash value of the Redis command
-	 * @return Credis_Client The client object associated with the hash
+	 * @return Client The client object associated with the hash
 	 */
 	private function nextNode($needle) {
 		$haystack = $this->nodes;
